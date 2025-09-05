@@ -28,12 +28,19 @@ function drawX(ctx, row, col, lineSpacing) {
 function drawO(ctx, row, col, lineSpacing) {
   ctx.strokeStyle = 'black';
   ctx.lineWidth = 5;
-  const centerX = col * lineSpacing + lineSpacing / 2;
-  const centerY = row * lineSpacing + lineSpacing / 2;
+  const x = col * lineSpacing;
+  const y = row * lineSpacing;
   const padding = lineSpacing / 5;
-  const radius = lineSpacing / 2 - padding;
+  const radius = lineSpacing / 2 - padding; 
   ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+  ctx.moveTo(x + padding, y + padding);
+  ctx.lineTo(x + lineSpacing - padding, y + padding);
+  ctx.moveTo(x + lineSpacing - padding, y + padding);
+  ctx.lineTo(x + lineSpacing - padding, y + lineSpacing - padding);
+  ctx.moveTo(x + lineSpacing - padding, y + lineSpacing - padding);
+  ctx.lineTo(x + padding, y + lineSpacing - padding);
+  ctx.moveTo(x + padding, y + lineSpacing - padding);
+  ctx.lineTo(x + padding, y + padding);
   ctx.stroke();
 }
 
