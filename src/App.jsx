@@ -129,7 +129,7 @@ function GameBoard() {
   const saveGame = () => {
     const gameState = {
       board: board,
-      turn: (winner) ? null : (turn % 2 === 1 ? 'X' : 'O'),
+      turn: (winner) ? null : (turn % 2 === 1 ? '1' : '2'),
       status: getJsonStatus(winner, turn, gridSize)
     };
     const jsonString = JSON.stringify(gameState, null, 2); // Use null, 2 for formatted JSON
@@ -171,9 +171,9 @@ function GameBoard() {
 
     board.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
-        if (cell === 'X') {
+        if (cell === '1') {
           drawX(ctx, rowIndex, colIndex, lineSpacing);
-        } else if (cell === 'O') {
+        } else if (cell === '2') {
           drawO(ctx, rowIndex, colIndex, lineSpacing);
         }
       });
@@ -257,7 +257,7 @@ function GameBoard() {
 
     if (board[row][col]) return;
 
-    const currentPlayerSymbol = turn % 2 === 1 ? 'X' : 'O';
+    const currentPlayerSymbol = turn % 2 === 1 ? '1' : '2';
     const newBoard = board.map(arr => [...arr]);
     newBoard[row][col] = currentPlayerSymbol;
     setBoard(newBoard);
@@ -284,7 +284,7 @@ function GameBoard() {
   } else if (turn > gridSize * gridSize) {
     status = "It's a Draw!";
   } else {
-    status = `Turn ${turn}: Player ${turn % 2 === 1 ? 'X' : 'O'}`;
+    status = `Turn ${turn}: Player ${turn % 2 === 1 ? '1' : '2'}`;
   }
 
   // JSX to render the game UI
