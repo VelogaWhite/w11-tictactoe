@@ -17,10 +17,12 @@ function drawX(ctx, row, col, lineSpacing) {
   const y = row * lineSpacing;
   const padding = lineSpacing / 5;
   ctx.beginPath();
-  ctx.moveTo(x + padding, y + padding);
+  ctx.moveTo(x + padding*2.5, y + padding);
   ctx.lineTo(x + lineSpacing - padding, y + lineSpacing - padding);
-  ctx.moveTo(x + lineSpacing - padding, y + padding);
+  ctx.moveTo(x + lineSpacing - padding, y + lineSpacing - padding);
   ctx.lineTo(x + padding, y + lineSpacing - padding);
+  ctx.moveTo(x + padding, y + lineSpacing - padding);
+  ctx.lineTo(x + padding*2.5, y + padding);
   ctx.stroke();
 }
 
