@@ -195,53 +195,54 @@ function GameBoard() {
   };
 
   // Handler for when a file is selected
+  // Handler for when a file is selected
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
+   const file = event.target.files[0];
+      if (file) {
+          const reader = new FileReader();
 
-      // This event fires when the file has been successfully read
-      reader.onload = (e) => {
-        const fileContent = e.target.result;
-        try {
-          // Parse the JSON string into a JavaScript object
-          const loadedGameState = JSON.parse(fileContent);
+// This event fires when the file has been successfully read
+          reader.onload = (e) => {
+            const fileContent = e.target.result;
+            try {
+              // Parse the JSON string into a JavaScript object
+              const loadedGameState = JSON.parse(fileContent);
 
-          // We check if the loaded board has valid dimensions
-          if (!loadedGameState.board || loadedGameState.board.length !== loadedGameState.board[0].length) {
-            alert("Invalid board dimensions in the file.");
-            return;
-          }
+              // We check if the loaded board has valid dimensions
+              if (!loadedGameState.board || loadedGameState.board.length !== loadedGameState.board[0].length) {
+              alert("Invalid board dimensions in the file.");
+              return;
+              }
 
-          // A good practice is to normalize the loaded board state.
-          // In case the JSON file uses "" instead of null for empty cells.
-          const normalizedBoard = loadedGameState.board.map(row => 
-            row.map(cell => cell === "" ? null : cell)
-          );
+              // A good practice is to normalize the loaded board state.
+              // In case the JSON file uses "" instead of null for empty cells.
+              const normalizedBoard = loadedGameState.board.map(row =>
+              row.map(cell => cell === "" ? null : cell)
+              );
 
-          // Update all the state variables
-          setGridSize(normalizedBoard.length);
-          setBoard(normalizedBoard);
-          setTurn(loadedGameState.turn === 'X' ? 1 : 2);
+              // Update all the state variables
+              setGridSize(normalizedBoard.length);
+              setBoard(normalizedBoard);
+              setTurn(loadedGameState.turn === '1' ? 1 : 2);
 
-          // Recalculate the winner based on the new board
-          const newWinner = calculateWinner(normalizedBoard, normalizedBoard.length);
-          if (newWinner) {
-            setWinner(newWinner);
-          } else {
-            setWinner(null);
-          }
-        } catch (error) {
-          console.error("Failed to parse JSON:", error);
-          // In a real app, you would use a custom modal instead of alert
-          alert("Invalid game file. Please select a valid JSON file.");
-        }
-      };
+              // Recalculate the winner based on the new board
+              const newWinner = calculateWinner(normalizedBoard, normalizedBoard.length);
+              if (newWinner) {
+              setWinner(newWinner);
+              } else {
+              setWinner(null);
+              }
+              } catch (error) {
+              console.error("Failed to parse JSON:", error);
+              // In a real app, you would use a custom modal instead of alert
+              alert("Invalid game file. Please select a valid JSON file.");
+              }
+          };
 
-      // Start reading the file as text
-      reader.readAsText(file);
+          // Start reading the file as text
+          reader.readAsText(file);
     }
-  };
+};
 
   // Handler for a canvas click
   const handleCanvasClick = (event) => {
