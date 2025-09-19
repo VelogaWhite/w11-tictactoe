@@ -9,8 +9,8 @@ function App() {
   );
 }
 
-// Function to draw 'X' on the canvas
-function drawX(ctx, row, col, lineSpacing) {
+// Function to draw '1' on the canvas
+function draw1(ctx, row, col, lineSpacing) {
   ctx.strokeStyle = 'black';
   ctx.lineWidth = 5;
   const x = col * lineSpacing;
@@ -18,16 +18,12 @@ function drawX(ctx, row, col, lineSpacing) {
   const padding = lineSpacing / 5;
   ctx.beginPath();
   ctx.moveTo(x + padding*2.5, y + padding);
-  ctx.lineTo(x + lineSpacing - padding, y + lineSpacing - padding);
-  ctx.moveTo(x + lineSpacing - padding, y + lineSpacing - padding);
-  ctx.lineTo(x + padding, y + lineSpacing - padding);
-  ctx.moveTo(x + padding, y + lineSpacing - padding);
-  ctx.lineTo(x + padding*2.5, y + padding);
+  ctx.lineTo(x + padding*2.5, y + lineSpacing - padding);
   ctx.stroke();
 }
 
-// Function to draw 'O' on the canvas
-function drawO(ctx, row, col, lineSpacing) {
+// Function to draw '2' on the canvas
+function draw2(ctx, row, col, lineSpacing) {
   ctx.strokeStyle = 'black';
   ctx.lineWidth = 5;
   const x = col * lineSpacing;
@@ -35,69 +31,50 @@ function drawO(ctx, row, col, lineSpacing) {
   const padding = lineSpacing / 5;
   const radius = lineSpacing / 2 - padding; 
   ctx.beginPath();
-  ctx.moveTo(x + padding, y + padding);
-  ctx.lineTo(x + lineSpacing - padding, y + padding);
-  ctx.moveTo(x + lineSpacing - padding, y + padding);
-  ctx.lineTo(x + lineSpacing - padding, y + lineSpacing - padding);
-  ctx.moveTo(x + lineSpacing - padding, y + lineSpacing - padding);
-  ctx.lineTo(x + padding, y + lineSpacing - padding);
-  ctx.moveTo(x + padding, y + lineSpacing - padding);
-  ctx.lineTo(x + padding, y + padding);
+  ctx.moveTo(x + padding*2, y + padding);
+  ctx.lineTo(x + padding*2, y + lineSpacing - padding);
+  ctx.moveTo(x + padding*3, y + padding);
+  ctx.lineTo(x + padding*3, y + lineSpacing - padding);
+  ctx.stroke();
+}
+// Function to draw '3' on the canvas
+function draw3(ctx, row, col, lineSpacing) {
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 5;
+  const x = col * lineSpacing;
+  const y = row * lineSpacing;
+  const padding = lineSpacing / 5;
+  const radius = lineSpacing / 2 - padding; 
+  ctx.beginPath();
+  ctx.moveTo(x + padding*2, y + padding);
+  ctx.lineTo(x + padding*2, y + lineSpacing - padding);
+  ctx.moveTo(x + padding*3, y + padding);
+  ctx.lineTo(x + padding*3, y + lineSpacing - padding);
+  ctx.moveTo(x + padding*4, y + padding);
+  ctx.lineTo(x + padding*4, y + lineSpacing - padding);
+  ctx.moveTo(x + padding*4, y + padding);
+  ctx.lineTo(x + padding*4, y + lineSpacing - padding);
   ctx.stroke();
 }
 
 // Function to check for a winner
-function calculateWinner(board, gridSize) {
+function checkValid(board, gridSize) {
   // Check rows
   for (let i = 0; i < gridSize; i++) {
     if (board[i][0] && board[i].every(cell => cell === board[i][0])) {
-      return board[i][0];
+      return None;
     }
   }
 
   // Check columns
   for (let i = 0; i < gridSize; i++) {
-    if (board[0][i]) {
-      let isWin = true;
-      for (let j = 1; j < gridSize; j++) {
-        if (board[j][i] !== board[0][i]) {
-          isWin = false;
-          break;
+      for (let j = 0; j < gridSize; j++) {
+        if (board[j][0] && board[j].every(cell => cell == board[j][0])) {
+          return None;
         }
       }
-      if (isWin) {
-        return board[0][i];
-      }
-    }
   }
 
-  // Check diagonal (top-left to bottom-right)
-  if (board[0][0]) {
-    let isWin = true;
-    for (let i = 1; i < gridSize; i++) {
-      if (board[i][i] !== board[0][0]) {
-        isWin = false;
-        break;
-      }
-    }
-    if (isWin) {
-      return board[0][0];
-    }
-  }
-
-  // Check diagonal (top-right to bottom-left)
-  if (board[0][gridSize - 1]) {
-    let isWin = true;
-    for (let i = 1; i < gridSize; i++) {
-      if (board[i][gridSize - 1 - i] !== board[0][gridSize - 1]) {
-        isWin = false;
-        break;
-      }
-    }
-    if (isWin) {
-      return board[0][gridSize - 1];
-    }
-  }
 
   return null;
 }
@@ -105,50 +82,14 @@ function calculateWinner(board, gridSize) {
 // The main game board component
 function GameBoard() {
   const canvasRef = useRef(null);
-  const [gridSize, setGridSize] = useState(3);
+  const [gridSize, setGridSize] = useState(5);
   const [canvasSize, setCanvasSize] = useState(gridSize * 100);
-  const fileInputRef = useRef(null);
   const [turn, setTurn] = useState(1);
   const [board, setBoard] = useState(
     Array.from({ length: gridSize }, () => Array(gridSize).fill(null))
   );
   const [winner, setWinner] = useState(null);
 
-  // Helper to determine game status for JSON saving
-  const getJsonStatus = (winner, turn, gridSize) => {
-    if (winner) {
-      return `${winner}_wins`;
-    } else if (turn > gridSize * gridSize) {
-      return "draw";
-    } else {
-      return `in_progress`;
-    }
-  }
-
-  // Function to prepare game state for saving to a JSON file
-  const saveGame = () => {
-    const gameState = {
-      board: board,
-      turn: (winner) ? null : (turn % 2 === 1 ? '1' : '2'),
-      status: getJsonStatus(winner, turn, gridSize)
-    };
-    const jsonString = JSON.stringify(gameState, null, 2); // Use null, 2 for formatted JSON
-
-    // Create a Blob from the JSON string
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    // Create a temporary link element to trigger the download
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `tictactoe_game_${Date.now()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    
-    // Clean up
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
   // Effect to handle canvas drawing whenever the board state or grid size changes
   useEffect(() => {
@@ -172,9 +113,11 @@ function GameBoard() {
     board.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
         if (cell === '1') {
-          drawX(ctx, rowIndex, colIndex, lineSpacing);
+          draw1(ctx, rowIndex, colIndex, lineSpacing);
         } else if (cell === '2') {
-          drawO(ctx, rowIndex, colIndex, lineSpacing);
+          draw2(ctx, rowIndex, colIndex, lineSpacing);
+        } else if (cell === '3'){
+          draw3(ctx, rowIndex , colIndex, lineSpacing);
         }
       });
     });
@@ -188,61 +131,7 @@ function GameBoard() {
     setWinner(null);
   }, [gridSize]);
 
-  // Handler for the "Load Game" button click
-  const handleLoadButtonClick = () => {
-    // This will programmatically click the hidden file input
-    fileInputRef.current.click();
-  };
 
-  // Handler for when a file is selected
-  // Handler for when a file is selected
-  const handleFileChange = (event) => {
-   const file = event.target.files[0];
-      if (file) {
-          const reader = new FileReader();
-
-// This event fires when the file has been successfully read
-          reader.onload = (e) => {
-            const fileContent = e.target.result;
-            try {
-              // Parse the JSON string into a JavaScript object
-              const loadedGameState = JSON.parse(fileContent);
-
-              // We check if the loaded board has valid dimensions
-              if (!loadedGameState.board || loadedGameState.board.length !== loadedGameState.board[0].length) {
-              alert("Invalid board dimensions in the file.");
-              return;
-              }
-
-              // A good practice is to normalize the loaded board state.
-              // In case the JSON file uses "" instead of null for empty cells.
-              const normalizedBoard = loadedGameState.board.map(row =>
-              row.map(cell => cell === "" ? null : cell)
-              );
-
-              // Update all the state variables
-              setGridSize(normalizedBoard.length);
-              setBoard(normalizedBoard);
-              setTurn(loadedGameState.turn === '1' ? 1 : 2);
-
-              // Recalculate the winner based on the new board
-              const newWinner = calculateWinner(normalizedBoard, normalizedBoard.length);
-              if (newWinner) {
-              setWinner(newWinner);
-              } else {
-              setWinner(null);
-              }
-              } catch (error) {
-              console.error("Failed to parse JSON:", error);
-              // In a real app, you would use a custom modal instead of alert
-              alert("Invalid game file. Please select a valid JSON file.");
-              }
-          };
-
-          // Start reading the file as text
-          reader.readAsText(file);
-    }
-};
 
   // Handler for a canvas click
   const handleCanvasClick = (event) => {
@@ -258,12 +147,19 @@ function GameBoard() {
 
     if (board[row][col]) return;
 
-    const currentPlayerSymbol = turn % 2 === 1 ? '1' : '2';
+    let currentPlayerSymbol; 
+      if (turn%3 == 0 ){
+      currentPlayerSymbol = '3';
+    } else if (turn%3 == 2){
+      currentPlayerSymbol = '2';
+    } else {
+      currentPlayerSymbol = '1';
+    }
     const newBoard = board.map(arr => [...arr]);
     newBoard[row][col] = currentPlayerSymbol;
     setBoard(newBoard);
 
-    const newWinner = calculateWinner(newBoard, gridSize);
+    const newWinner = checkValid(newBoard, gridSize);
     if (newWinner) {
       setWinner(newWinner);
     }
@@ -285,7 +181,7 @@ function GameBoard() {
   } else if (turn > gridSize * gridSize) {
     status = "It's a Draw!";
   } else {
-    status = `Turn ${turn}: Player ${turn % 2 === 1 ? '1' : '2'}`;
+    status = `Turn ${turn}: Player ${turn % 3 === 1 ? '1' : '2'}`;
   }
 
   // JSX to render the game UI
@@ -309,21 +205,6 @@ function GameBoard() {
         <button id="reset-btn" onClick={handleReset} style={{ marginTop: '10px' }}>
           Reset
         </button>
-      </div>
-      <div style={{ marginTop: '10px' }}>
-        <button onClick={handleLoadButtonClick} style={{ marginRight: '5px' }}>
-          Load Game
-        </button>
-        <button onClick={saveGame}>
-          Save Game
-        </button>
-        <input
-          type="file"
-          id="file-input"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
       </div>
     </>
   );
